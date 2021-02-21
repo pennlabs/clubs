@@ -216,9 +216,7 @@ const Table = ({
     newFilters[newFilter.label] = newFilter.value
     setSelectedFilter(newFilters)
   }
-  if (data.length <= 0) {
-    return <></>
-  }
+
   return (
     <Styles>
       <Toolbar>
@@ -302,13 +300,13 @@ const Table = ({
             ))}
           </thead>
           <tbody {...getTableBodyProps()}>
-            {page.map((row, i) => {
+            {page.map((row) => {
               prepareRow(row)
               return (
                 <tr key={row.id} {...row.getRowProps()}>
                   {columns.map((column, i) => {
                     return (
-                      <td>
+                      <td key={i}>
                         {column.render ? (
                           column.render(row.original.id) ? (
                             column.render(row.original.id)
@@ -335,14 +333,14 @@ const Table = ({
         <div className="is-clearfix">
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => previousPage()}
+            onClick={() => gotoPage(0)}
             disabled={!canPreviousPage}
           >
             <Icon name="chevrons-left" />
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => gotoPage(0)}
+            onClick={() => previousPage()}            
             disabled={!canPreviousPage}
           >
             <Icon name="chevron-left" />

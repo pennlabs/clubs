@@ -156,9 +156,9 @@ export const ModelTable = ({
             ? objects?.filter((item) => item.id === id)[0]
             : objects?.[id]
           const value = obj?.[column.name]
-          return obj && !(value === null) && !(value === undefined)
+          return obj && !(value === null)
             ? renderFunction(value, obj)
-            : 'N/A'
+            : 'None'
         },
       }
     } else return column

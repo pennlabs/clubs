@@ -292,7 +292,7 @@ const eventTableFields = [
   {
     name: 'is_ics_event',
     label: 'ICS',
-    converter: (a: boolean): ReactElement => <Icon name={a ? 'check' : 'x'} />,
+    converter: (a: boolean): ReactElement => <Icon className={`has-text-${a ? 'has-text-success' : 'has-text-danger'}`} name={a ? 'check' : 'x'} />,
   },
 ]
 
