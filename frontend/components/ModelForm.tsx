@@ -151,10 +151,14 @@ export const ModelTable = ({
       const renderFunction = column.converter
       return {
         ...column,
-        render: (id, _) => {
-          const obj = objects?.[id]
+        render: (id) => {
+          const obj = objects?.filter((item) => item.id === id)[0]
+            ? objects?.filter((item) => item.id === id)[0]
+            : objects?.[id]
           const value = obj?.[column.name]
-          return obj && value ? renderFunction(value, obj) : 'N/A'
+          return obj && !(value === null) && !(value === undefined)
+            ? renderFunction(value, obj)
+            : 'N/A'
         },
       }
     } else return column

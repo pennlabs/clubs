@@ -14,6 +14,7 @@ import {
   BORDER,
   CLUBS_GREY,
   FOCUS_GRAY,
+  LIGHT_GRAY,
   WHITE,
 } from '../../constants/colors'
 import { BORDER_RADIUS, MD, mediaMaxWidth } from '../../constants/measurements'
@@ -96,6 +97,10 @@ const Input = styled.input`
   }
 `
 
+const GreyText = styled.span`
+  color: ${LIGHT_GRAY};
+`
+
 const Table = ({
   columns,
   data,
@@ -105,6 +110,7 @@ const Table = ({
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [tableData, setTableData] = useState<Row[]>([])
   const [selectedFilter, setSelectedFilter] = useState<any>({})
+  const [sortedColumn, setSortedColumn] = useState<any>(null)
   useEffect(() => {
     const searchedData = data.filter((item) => {
       if (!searchQuery || searchQuery.length < 3) {
@@ -189,6 +195,18 @@ const Table = ({
     setSearchQuery(e.target.value)
   }
 
+  const handleColumnsSort = (target) => {
+    if (sortedColumn && sortedColumn.name === target) {
+      if (sortedColumn.status === 'asc') {
+        setSortedColumn({ name: sortedColumn.name, status: 'desc' })
+      } else {
+        setSortedColumn(null)
+      }
+    } else {
+      setSortedColumn({ name: target, status: 'asc' })
+    }
+  }
+
   const components = {
     IndicatorSeparator: () => null,
   }
@@ -198,7 +216,6 @@ const Table = ({
     newFilters[newFilter.label] = newFilter.value
     setSelectedFilter(newFilters)
   }
-
   if (data.length <= 0) {
     return <></>
   }
@@ -263,18 +280,22 @@ const Table = ({
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {titleize(column.render('Header'))}
-                    <span style={{ marginLeft: '1rem' }}>
-                      {column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <Icon name="chevron-down" />
+                    <div onClick={() => handleColumnsSort(column.header)}>
+                      {titleize(column.render('Header'))}
+                      <span style={{ marginLeft: '1rem' }}>
+                        {column.isSorted ? (
+                          column.isSortedDesc ? (
+                            <Icon name="chevron-down" />
+                          ) : (
+                            <Icon name="chevron-up" />
+                          )
+                        ) : sortedColumn === null ? (
+                          <Icon name="arrow-vertical" />
                         ) : (
-                          <Icon name="chevron-up" />
-                        )
-                      ) : (
-                        ''
-                      )}
-                    </span>
+                          ''
+                        )}
+                      </span>
+                    </div>
                   </th>
                 ))}
               </tr>
@@ -287,10 +308,18 @@ const Table = ({
                 <tr key={row.id} {...row.getRowProps()}>
                   {columns.map((column, i) => {
                     return (
-                      <td key={i}>
-                        {column.render
-                          ? column.render(row.original.id, row.id)
-                          : row.original[column.name]}
+                      <td>
+                        {column.render ? (
+                          column.render(row.original.id) ? (
+                            column.render(row.original.id)
+                          ) : (
+                            <GreyText>None</GreyText>
+                          )
+                        ) : row.original[column.name] ? (
+                          row.original[column.name]
+                        ) : (
+                          <GreyText>None</GreyText>
+                        )}
                       </td>
                     )
                   })}
@@ -303,17 +332,17 @@ const Table = ({
         <h1>No matches were found. Please change your filters.</h1>
       )}
       {pageOptions.length > 1 && (
-        <div className="is-clearfix" style={{ display: 'flex' }}>
+        <div className="is-clearfix">
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => gotoPage(0)}
+            onClick={() => previousPage()}
             disabled={!canPreviousPage}
           >
             <Icon name="chevrons-left" />
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => previousPage()}
+            onClick={() => gotoPage(0)}
             disabled={!canPreviousPage}
           >
             <Icon name="chevron-left" />
@@ -332,21 +361,23 @@ const Table = ({
           </select>
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => gotoPage(pageCount - 1)}
+            onClick={() => nextPage()}
             disabled={!canNextPage}
           >
             <Icon name="chevron-right" />
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => nextPage()}
+            onClick={() => gotoPage(pageCount - 1)}
             disabled={!canNextPage}
           >
             <Icon name="chevrons-right" />
           </button>
-          <span className="is-pulled-right">
-            {data.length} total entries, {pageSize} entries per page
-          </span>
+          <div className="is-pulled-right">
+            <span>
+              {data.length} total entries, {pageSize} entries per page
+            </span>
+          </div>
         </div>
       )}
     </Styles>
