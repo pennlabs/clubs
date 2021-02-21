@@ -1187,6 +1187,19 @@ class ClubSerializer(ManyToManySaveMixin, ClubListSerializer):
             )
         return out
 
+    def validate_mission(self, value):
+        """
+        Allow the mission to have HTML tags that come from a whitelist.
+        The description must exist and not be extremely short.
+        """
+        out = clean(value).strip()
+        if len(out) <= 10:
+            raise serializers.ValidationError(
+                "You must enter a valid mission for your organization."
+            )
+        return out
+
+
     def validate_how_to_get_involved(self, value):
         """
         Allow the how to get involved field to have whitelisted HTML tags.
@@ -1323,7 +1336,7 @@ class ClubSerializer(ManyToManySaveMixin, ClubListSerializer):
         # if key fields were edited, require re-approval
         needs_reapproval = False
         if self.instance:
-            for field in {"name", "image", "description"}:
+            for field in {"name", "image", "mission"}:
                 if field in self.validated_data and not self.validated_data[
                     field
                 ] == getattr(self.instance, field, None):
@@ -1403,6 +1416,8 @@ class ClubSerializer(ManyToManySaveMixin, ClubListSerializer):
             "approved_comment",
             "badges",
             "description",
+            "mission",
+            "mission",
             "events",
             "facebook",
             "github",

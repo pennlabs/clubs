@@ -252,6 +252,7 @@ class Club(models.Model):
     subtitle = models.CharField(blank=True, max_length=255)
     terms = models.CharField(blank=True, max_length=1024)
     description = models.TextField(blank=True)  # rich html
+    mission = models.TextField(blank=True) # rich html
     address = models.TextField(blank=True)
     founded = models.DateField(blank=True, null=True)
     size = models.IntegerField(choices=SIZE_CHOICES, default=SIZE_SMALL)
