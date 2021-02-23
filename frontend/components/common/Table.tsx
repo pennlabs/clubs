@@ -63,7 +63,6 @@ type tableProps = {
 
 const Styles = styled.div`
   padding: 1rem;
-  width: 100%;
 `
 
 const SearchWrapper = styled.div`
@@ -77,7 +76,7 @@ const SearchWrapper = styled.div`
   }
 `
 const Toolbar = styled.div`
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 `
 const Input = styled.input`
   border: 1px solid ${ALLBIRDS_GRAY};
@@ -219,7 +218,7 @@ const Table = ({
 
   return (
     <Styles>
-      <Toolbar>
+      <Toolbar className = "is-clearfix">
         <div className="is-pulled-right">
           <SearchWrapper>
             <Input
@@ -232,16 +231,10 @@ const Table = ({
             />
           </SearchWrapper>
         </div>
-        <div className="is-pulled-left" style={{ width: '70%' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-            }}
-          >
+        <div className="is-pulled-left is-clearfix" style={{ width: '70%'}}>
             {filterOptions &&
               filterOptions.map((filterOption) => (
-                <div style={{ marginRight: '10px' }}>
+                <span style={{ marginRight: '10px', width:"40%", float:"left"}}>
                   <Select
                     value={
                       selectedFilter[filterOption.label]
@@ -265,9 +258,8 @@ const Table = ({
                       return { value: option.key, label: option.label }
                     })}
                   />
-                </div>
+                </span>
               ))}
-          </div>
         </div>
       </Toolbar>
 
