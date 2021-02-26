@@ -164,6 +164,7 @@ export interface Club {
   listserv: string
   members: Membership[]
   membership_count: number
+  mission: string
   name: string
   recruiting_cycle: ClubRecruitingCycle
   signature_events: string

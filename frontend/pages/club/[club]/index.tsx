@@ -8,6 +8,7 @@ import FilesList from 'components/ClubPage/FilesList'
 import Header from 'components/ClubPage/Header'
 import InfoBox from 'components/ClubPage/InfoBox'
 import MemberList from 'components/ClubPage/MemberList'
+import Mission from 'components/ClubPage/Mission'
 import QuestionList from 'components/ClubPage/QuestionList'
 import RenewalRequest from 'components/ClubPage/RenewalRequestDialog'
 import SocialIcons from 'components/ClubPage/SocialIcons'
@@ -204,6 +205,9 @@ const ClubPage = ({
               updateRequests={updateRequests}
             />
           )}
+          {club.mission.length>0 && <StyledCard bordered>
+            <Mission club={club} />
+          </StyledCard>}
           <StyledCard bordered>
             <Description club={club} />
           </StyledCard>
