@@ -195,9 +195,9 @@ const Table = ({
   }
 
   const handleColumnsSort = (target) => {
-    if (sortedColumn && sortedColumn.name === target) {
+    if (sortedColumn && (sortedColumn.name === target)) {
       if (sortedColumn.status === 'asc') {
-        setSortedColumn({ name: sortedColumn.name, status: 'desc' })
+        setSortedColumn({ name: target, status: 'desc' })
       } else {
         setSortedColumn(null)
       }
@@ -270,17 +270,17 @@ const Table = ({
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    <div onClick={() => handleColumnsSort(column.header)}>
+                    <div onClick={() => handleColumnsSort(column.Header)}>
                       {titleize(column.render('Header'))}
                       <span style={{ marginLeft: '1rem' }}>
                         {column.isSorted ? (
                           column.isSortedDesc ? (
-                            <Icon name="chevron-down" />
+                            <Icon name="triangle-down" />
                           ) : (
-                            <Icon name="chevron-up" />
+                            <Icon name="triangle-up" />
                           )
                         ) : sortedColumn === null ? (
-                          <Icon name="arrow-vertical" />
+                          <Icon name="group-arrows" />
                         ) : (
                           ''
                         )}
