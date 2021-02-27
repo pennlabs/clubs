@@ -318,24 +318,26 @@ const Table = ({
             })}
           </tbody>
         </table>
-      ) : (
+      ) : data.length === 0 ? ( <h1>No items to show</h1> ) : (
         <h1>No matches were found. Please change your filters.</h1>
       )}
       {pageOptions.length > 1 && (
         <div className="is-clearfix">
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => gotoPage(0)}
             disabled={!canPreviousPage}
           >
-            <Icon name="chevrons-left" />
+            {'<<'}
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => previousPage()}            
             disabled={!canPreviousPage}
           >
-            <Icon name="chevron-left" />
+            {'<'}
           </button>
           <select
             value={pageIndex}
@@ -351,17 +353,19 @@ const Table = ({
           </select>
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => nextPage()}
             disabled={!canNextPage}
           >
-            <Icon name="chevron-right" />
+            {'>'}
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => gotoPage(pageCount - 1)}
             disabled={!canNextPage}
           >
-            <Icon name="chevrons-right" />
+            {'>>'}
           </button>
           <div className="is-pulled-right">
             <span>
