@@ -40,7 +40,7 @@ const PaginatedClubDisplay = ({
     if (nextUrl == null) {
       return null
     }
-    
+
     setLoading(true)
 
     // fetch the entry

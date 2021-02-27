@@ -195,7 +195,7 @@ const Table = ({
   }
 
   const handleColumnsSort = (target) => {
-    if (sortedColumn && (sortedColumn.name === target)) {
+    if (sortedColumn && sortedColumn.name === target) {
       if (sortedColumn.status === 'asc') {
         setSortedColumn({ name: target, status: 'desc' })
       } else {
@@ -218,7 +218,7 @@ const Table = ({
 
   return (
     <Styles>
-      <Toolbar className = "is-clearfix">
+      <Toolbar className="is-clearfix">
         <div className="is-pulled-right">
           <SearchWrapper>
             <Input
@@ -231,39 +231,41 @@ const Table = ({
             />
           </SearchWrapper>
         </div>
-        <div className="is-pulled-left is-clearfix" style={{ width: '70%'}}>
-            {filterOptions &&
-              filterOptions.map((filterOption) => (
-                <span style={{ marginRight: '10px', width:"40%", float:"left"}}>
-                  <Select
-                    value={
-                      selectedFilter[filterOption.label]
-                        ? {
-                            label: selectedFilter[filterOption.label].label,
-                            value: selectedFilter[filterOption.label].key,
-                          }
-                        : null
-                    }
-                    styles={styles}
-                    components={components}
-                    onChange={(value) =>
-                      handleFilterChange({
-                        value: value || null,
-                        label: filterOption.label ? filterOption.label : null,
-                      })
-                    }
-                    isClearable={true}
-                    placeholder={`Filter by ${titleize(filterOption.label)}`}
-                    options={filterOption.options.map((option) => {
-                      return { value: option.key, label: option.label }
-                    })}
-                  />
-                </span>
-              ))}
+        <div className="is-pulled-left is-clearfix" style={{ width: '70%' }}>
+          {filterOptions &&
+            filterOptions.map((filterOption) => (
+              <span
+                style={{ marginRight: '10px', width: '40%', float: 'left' }}
+              >
+                <Select
+                  value={
+                    selectedFilter[filterOption.label]
+                      ? {
+                          label: selectedFilter[filterOption.label].label,
+                          value: selectedFilter[filterOption.label].key,
+                        }
+                      : null
+                  }
+                  styles={styles}
+                  components={components}
+                  onChange={(value) =>
+                    handleFilterChange({
+                      value: value || null,
+                      label: filterOption.label ? filterOption.label : null,
+                    })
+                  }
+                  isClearable={true}
+                  placeholder={`Filter by ${titleize(filterOption.label)}`}
+                  options={filterOption.options.map((option) => {
+                    return { value: option.key, label: option.label }
+                  })}
+                />
+              </span>
+            ))}
         </div>
       </Toolbar>
 
-      {tableData.length > 0 ? (
+      {headerGroups.length > 0 ? (
         <table className="table is-fullwidth" {...getTableProps()}>
           <thead>
             {headerGroups.map((headerGroup) => (
@@ -291,35 +293,41 @@ const Table = ({
               </tr>
             ))}
           </thead>
-          <tbody {...getTableBodyProps()}>
-            {page.map((row) => {
-              prepareRow(row)
-              return (
-                <tr key={row.id} {...row.getRowProps()}>
-                  {columns.map((column, i) => {
-                    return (
-                      <td key={i}>
-                        {column.render ? (
-                          column.render(row.original.id) ? (
-                            column.render(row.original.id)
+          {tableData.length > 0 ? (
+            <tbody {...getTableBodyProps()}>
+              {page.map((row) => {
+                prepareRow(row)
+                return (
+                  <tr key={row.id} {...row.getRowProps()}>
+                    {columns.map((column, i) => {
+                      return (
+                        <td key={i}>
+                          {column.render ? (
+                            column.render(row.original.id) ? (
+                              column.render(row.original.id)
+                            ) : (
+                              <GreyText>None</GreyText>
+                            )
+                          ) : row.original[column.name] ? (
+                            row.original[column.name]
                           ) : (
                             <GreyText>None</GreyText>
-                          )
-                        ) : row.original[column.name] ? (
-                          row.original[column.name]
-                        ) : (
-                          <GreyText>None</GreyText>
-                        )}
-                      </td>
-                    )
-                  })}
-                </tr>
-              )
-            })}
-          </tbody>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          ) : data.length === 0 ? (
+            <h1>No items to show</h1>
+          ) : (
+            <h1>No matches were found. Please change your filters.</h1>
+          )}
         </table>
-      ) : data.length === 0 ? ( <h1>No items to show</h1> ) : (
-        <h1>No matches were found. Please change your filters.</h1>
+      ) : (
+        <h1>Nothing to Show</h1>
       )}
       {pageOptions.length > 1 && (
         <div className="is-clearfix">
@@ -334,7 +342,7 @@ const Table = ({
           <button
             style={{ marginRight: '0.5rem' }}
             className="is-light is-small"
-            onClick={() => previousPage()}            
+            onClick={() => previousPage()}
             disabled={!canPreviousPage}
           >
             {'<'}

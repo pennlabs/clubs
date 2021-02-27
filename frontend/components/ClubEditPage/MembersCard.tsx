@@ -104,7 +104,7 @@ export default function MembersCard({ club }: MembersCardProps): ReactElement {
             filterFunction: (selection, object) => object.active === selection,
           },
         ]}
-        searchableColumns = {["name", "email"]}
+        searchableColumns={['name', 'email']}
         currentTitle={(obj) =>
           obj != null ? `${obj.name} (${obj.email})` : 'Kicked Member'
         }
