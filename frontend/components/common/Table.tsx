@@ -116,10 +116,12 @@ const Table = ({
         return true
       }
       return searchableColumns.some((searchId) => {
-        const strings = item[searchId].split(' ')
-        return strings.some((string) =>
-          string.toLowerCase().startsWith(searchQuery.toLowerCase()),
-        )
+        if (typeof item[searchId] === 'string') {
+          const strings = item[searchId].split(' ')
+          return strings.some((string) =>
+            string.toLowerCase().startsWith(searchQuery.toLowerCase()),
+          )
+        } else return false
       })
     })
     const filteredData = searchedData.filter((item) => {

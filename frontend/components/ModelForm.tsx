@@ -148,7 +148,6 @@ export const ModelTable = ({
       })),
     [tableFields],
   )
-
   tableFields = tableFields.map((column, index) => {
     if (column.converter) {
       const renderFunction = column.converter
@@ -167,12 +166,12 @@ export const ModelTable = ({
 
   tableFields.push({
     name: 'Actions',
-    render: (_, index) => (
+    render: (id) => (
       <div className="buttons">
         {allowEditing && (
           <button
             onClick={() => {
-              return onEdit(objects[index])
+              return onEdit(objects[id])
             }}
             className="button is-primary is-small"
           >
@@ -188,10 +187,10 @@ export const ModelTable = ({
                     `Are you sure you want to ${deleteVerb.toLowerCase()} this ${noun.toLowerCase()}?`,
                   )
                 ) {
-                  onDelete(objects[index])
+                  onDelete(objects[id])
                 }
               } else {
-                onDelete(objects[index])
+                onDelete(objects[id])
               }
             }}
             className="button is-danger is-small"
@@ -199,7 +198,7 @@ export const ModelTable = ({
             <Icon name="trash" alt="delete" /> {deleteVerb}
           </button>
         )}
-        {actions && actions(objects[index])}
+        {actions && actions(objects[id])}
       </div>
     ),
   })
@@ -211,7 +210,9 @@ export const ModelTable = ({
           item.id ? item : { ...item, id: index },
         )}
         columns={tableFields}
-        searchableColumns={searchableColumns || []}
+        searchableColumns={
+          searchableColumns || tableFields.map((field) => field.name)
+        }
         filterOptions={filterOptions || []}
       />
     </>
