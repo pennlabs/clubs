@@ -323,13 +323,13 @@ const Table = ({
               })}
             </tbody>
           ) : data.length === 0 ? (
-            <h1>No items to show</h1>
+            <h1>No items to show.</h1>
           ) : (
             <h1>No matches were found. Please change your filters.</h1>
           )}
         </table>
       ) : (
-        <h1>Nothing to Show</h1>
+        <h1>Nothing to Show.</h1>
       )}
       {pageOptions.length > 1 && (
         <div className="is-clearfix">
