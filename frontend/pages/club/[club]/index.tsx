@@ -41,6 +41,7 @@ import {
   SHOW_ADDITIONAL_LINKS,
   SHOW_MEMBERS,
   SITE_NAME,
+  SITE_ID
 } from 'utils/branding'
 
 import { CLUB_ALUMNI_ROUTE, CLUB_ORG_ROUTE } from '~/constants'
@@ -205,7 +206,7 @@ const ClubPage = ({
               updateRequests={updateRequests}
             />
           )}
-          {club.mission.length>0 && <StyledCard bordered>
+          {SITE_ID === "clubs" && club.mission.length>0 && <StyledCard bordered>
             <Mission club={club} />
           </StyledCard>}
           <StyledCard bordered>
