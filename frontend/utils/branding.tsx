@@ -53,6 +53,7 @@ const sites = {
       'github',
       'linkedin',
       'listserv',
+      'mission',
       'recruiting_cycle',
       'size',
       'target_majors',

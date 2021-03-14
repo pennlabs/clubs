@@ -92,6 +92,8 @@ export const API_BASE_URL = `${SITE_ORIGIN}/api`
 
 export const EMPTY_DESCRIPTION =
   '<span style="color:#666">This club has not added a description yet.</span>'
+  export const EMPTY_MISSION =
+  '<span style="color:#666">This club has not added a mission yet.</span>'
 export const LOGIN_URL = `${API_BASE_URL}/accounts/login/`
 export const LOGOUT_URL = `${API_BASE_URL}/accounts/logout/`
 
