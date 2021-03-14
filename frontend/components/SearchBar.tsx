@@ -25,7 +25,6 @@ import {
   NAV_HEIGHT,
 } from '../constants/measurements'
 import { BODY_FONT } from '../constants/styles'
-import { doApiRequest } from '../utils'
 import { Icon } from './common'
 import DropdownFilter, { FilterHeader, SelectableTag } from './DropdownFilter'
 import FilterSearch, { FuseTag } from './FilterSearch'
@@ -345,13 +344,6 @@ export const SearchBarTextItem = ({
     const timeoutId: number = window.setTimeout(
       () =>
         searchCallback((inpt) => {
-          if (nameInput.trim().length > 0) {
-            doApiRequest('/searches/', {
-              method: 'POST',
-              body: { query: nameInput },
-            })
-          }
-
           if (nameInput.length <= 0) {
             const newInpt = { ...inpt }
             if (param in newInpt) {

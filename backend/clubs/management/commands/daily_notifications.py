@@ -117,7 +117,9 @@ class Command(BaseCommand):
             return False
 
         # get clubs that need approval
-        queued_clubs = Club.objects.filter(active=True, approved__isnull=True)
+        queued_clubs = Club.objects.filter(
+            active=True, approved__isnull=True, archived=False
+        )
         if queued_clubs.exists():
             context = {
                 "num_clubs": queued_clubs.count(),

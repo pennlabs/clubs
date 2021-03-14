@@ -80,6 +80,7 @@ class Command(BaseCommand):
                 "hap_partner_communication",
                 "wc_intro",
                 "osa_email_communication",
+                "ics_calendar_ingestation",
             ),
         )
         parser.add_argument(
@@ -340,8 +341,13 @@ class Command(BaseCommand):
                     )
             return
 
-        if action in {"osa_email_communication"}:
+        # Sends email to all club officers
+        if action in {"osa_email_communication", "ics_calendar_ingestation"}:
             clubs = Club.objects.all()
+
+            # Only send one email if it is a test email
+            if test_email is not None:
+                clubs = clubs[:1]
 
             for club in clubs:
                 emails = club.get_officer_emails()
@@ -349,7 +355,7 @@ class Command(BaseCommand):
                     emails = [test_email]
 
                 if not dry_run:
-                    send_mail_helper("osa_email_communication", None, emails, None)
+                    send_mail_helper(action, None, emails, None)
                     self.stdout.write(
                         f"Sent {action} email to {emails} for club {club}"
                     )

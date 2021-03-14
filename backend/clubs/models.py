@@ -246,6 +246,16 @@ class Club(models.Model):
     approved_comment = models.TextField(null=True, blank=True)
     approved_on = models.DateTimeField(null=True, blank=True)
 
+    archived = models.BooleanField(default=False)
+    archived_by = models.ForeignKey(
+        get_user_model(),
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="archived_clubs",
+        blank=True,
+    )
+    archived_on = models.DateTimeField(null=True, blank=True)
+
     code = models.SlugField(max_length=255, unique=True, db_index=True)
     active = models.BooleanField(default=False)
     name = models.CharField(max_length=255)

@@ -1373,24 +1373,47 @@ class ClubTestCase(TestCase):
         self.assertEqual(data["description"], "We do stuff.")
         self.assertEqual(len(data["tags"]), 2)
 
-    def test_club_delete_no_auth(self):
+    def test_club_archive_no_auth(self):
         """
-        Unauthenticated users should not be able to delete a club.
+        Unauthenticated users should not be able to archive a club.
         """
         resp = self.client.delete(reverse("clubs-detail", args=(self.club1.code,)))
         self.assertIn(resp.status_code, [400, 403], resp.content)
 
-    def test_club_delete(self):
+    def test_club_archive(self):
         """
-        Owners should be able to delete the club.
+        Owners should be able to archive the club.
         """
         self.client.login(username=self.user5.username, password="test")
 
+        # archive club
         resp = self.client.delete(reverse("clubs-detail", args=(self.club1.code,)))
         self.assertIn(resp.status_code, [200, 204], resp.content)
 
-        # ensure club was deleted
-        self.assertFalse(Club.objects.filter(name="Test Club").exists())
+        # ensure archived was correctly recorded
+        club = Club.objects.filter(archived=True).first()
+        self.assertTrue(club is not None)
+        self.assertEquals(club.code, self.club1.code)
+        self.assertTrue(club.archived)
+        self.assertEquals(club.archived_by, self.user5)
+
+        # ensure club was taken off clubs endpoint
+        resp = self.client.get(reverse("clubs-list"))
+        self.assertIn(resp.status_code, [200], resp.content)
+        codes = [club["code"] for club in resp.data]
+        self.assertNotIn(self.club1.code, codes)
+
+        # unarchive club
+        self.club1.archived = False
+        self.club1.archived_by = None
+        self.club1.archived_on = None
+        self.club1.save()
+
+        # ensure club was put back on clubs endpoint
+        resp = self.client.get(reverse("clubs-list"))
+        self.assertIn(resp.status_code, [200], resp.content)
+        codes = [club["code"] for club in resp.data]
+        self.assertIn(self.club1.code, codes)
 
     def test_club_deactivate(self):
         """
