@@ -101,11 +101,7 @@ const PaginatedClubDisplay = ({
         />
       )}
       {isLoading && <Loading delay={0} />}
-<<<<<<< HEAD
-      {clubs && clubs.length <= 0 && (
-=======
       {(clubs == null || clubs.length <= 0) && (
->>>>>>> add bugfix
         <EmptyState>
           <img
             src="/static/img/button.svg"
