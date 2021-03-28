@@ -100,6 +100,7 @@ const GreyText = styled.span`
   color: ${LIGHT_GRAY};
 `
 
+
 const Table = ({
   columns,
   data,
@@ -121,7 +122,8 @@ const Table = ({
           return strings.some((string) =>
             string.toLowerCase().startsWith(searchQuery.toLowerCase()),
           )
-        } else return false
+        } 
+        return false
       })
     })
     const filteredData = searchedData.filter((item) => {
@@ -304,17 +306,11 @@ const Table = ({
                     {columns.map((column, i) => {
                       return (
                         <td key={i}>
-                          {column.render ? (
-                            column.render(row.original.id) ? (
-                              column.render(row.original.id)
-                            ) : (
-                              <GreyText>None</GreyText>
-                            )
-                          ) : row.original[column.name] ? (
-                            row.original[column.name]
-                          ) : (
-                            <GreyText>None</GreyText>
-                          )}
+                          {
+    column.render ?
+    (column.render(row.original.id) || (<GreyText>None</GreyText>))
+    : (row.original[column.name] || (<GreyText>None</GreyText>))
+}
                         </td>
                       )
                     })}
