@@ -76,7 +76,7 @@ const SearchWrapper = styled.div`
   }
 `
 const Toolbar = styled.div`
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 `
 const Input = styled.input`
   border: 1px solid ${ALLBIRDS_GRAY};
@@ -205,7 +205,7 @@ const Table = ({
   return (
     <Styles>
       <Toolbar>
-        <div className="is-pulled-right">
+        <div className="is-pulled-left">
           <SearchWrapper>
             <Input
               className="input"
