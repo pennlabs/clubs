@@ -80,6 +80,14 @@ const ProfileForm = ({
     }
   }
 
+  const affiliations = [
+    { value: 0, label: 'Undergraduate Student' },
+    { value: 1, label: 'Masters Student' },
+    { value: 2, label: 'Professional Student' },
+    { value: 3, label: 'Doctoral Student' },
+    { value: 4, label: 'Faculty or Staff Member' },
+  ]
+
   return (
     <>
       <Formik
@@ -97,6 +105,14 @@ const ProfileForm = ({
                 isImage
               />
               <Field name="graduation_year" as={TextField} type="number" />
+              <Field
+                name="affiliation"
+                as={SelectField}
+                choices={affiliations}
+                valueDeserialize={(val) =>
+                  affiliations.find((item) => item.value === val)
+                }
+              />
               <Field name="school" as={SelectField} choices={schools} isMulti />
               <Field name="major" as={SelectField} choices={majors} isMulti />
               <Field

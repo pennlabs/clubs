@@ -1415,8 +1415,25 @@ class Profile(models.Model):
     Additional information attached to a user account.
     """
 
+    UNDERGRADUATE = 0
+    MASTERS = 1
+    PROFESSIONAL = 2
+    PHD = 3
+    STAFF = 4
+
+    AFFILIATION_CHOICES = (
+        (UNDERGRADUATE, "Undergraduate"),
+        (MASTERS, "Masters"),
+        (PROFESSIONAL, "Professional"),
+        (PHD, "Doctoral"),
+        (STAFF, "Staff"),
+    )
+
     user = models.OneToOneField(
         get_user_model(), on_delete=models.CASCADE, primary_key=True
+    )
+    affiliation = models.PositiveSmallIntegerField(
+        choices=AFFILIATION_CHOICES, default=UNDERGRADUATE
     )
     image = models.ImageField(upload_to=get_user_file_name, null=True, blank=True)
     uuid_secret = models.UUIDField(default=uuid.uuid4)
@@ -1427,6 +1444,36 @@ class Profile(models.Model):
     graduation_year = models.PositiveSmallIntegerField(null=True, blank=True)
     school = models.ManyToManyField(School, blank=True)
     major = models.ManyToManyField(Major, blank=True)
+
+    def detect_information(self):
+        """
+        Try to detect appropriate values for profile fields based on what platform has
+        returned. Currently only supports detecting the affiliation.
+        This method is not very accurate and should only be used to provide the user
+        an initial guess.
+
+        Overwrites existing information.
+        """
+
+        # detect the affilation
+        if self.user.groups.filter(name="platform_student").exists():
+            # if the user has the student group from platform, they're probably student
+            domain = self.user.email.split("@", 1)[-1].lower()
+            if domain in {
+                "nursing.upenn.edu",
+                "sas.upenn.edu",
+                "seas.upenn.edu",
+                "upenn.edu",
+                "wharton.upenn.edu",
+            }:
+                # domains commonly associated with undergrad schools marked as undergrad
+                self.affiliation = Profile.UNDERGRADUATE
+            else:
+                self.affiliation = Profile.MASTERS
+        else:
+            self.affiliation = Profile.STAFF
+
+        self.save(update_fields=["affiliation"])
 
     def __str__(self):
         return self.user.username
