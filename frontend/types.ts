@@ -287,3 +287,8 @@ export type DynamicQuestion = {
   type: string
   choices?: { id: string; label: string }[]
 }
+
+export enum ApplicationQuestionType {
+  Text = 0,
+  MultipleChoice = 10,
+}

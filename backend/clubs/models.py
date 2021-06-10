@@ -1483,7 +1483,7 @@ class Profile(models.Model):
 
 class ClubApplication(models.Model):
     """
-    Represents an application to a club.
+    Represents custom club application.
     """
 
     club = models.ForeignKey(Club, on_delete=models.CASCADE)
@@ -1492,6 +1492,7 @@ class ClubApplication(models.Model):
     name = models.TextField(blank=True)
     result_release_time = models.DateTimeField()
     external_url = models.URLField()
+    is_active = models.BooleanField(default=False, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1503,6 +1504,35 @@ class ClubApplication(models.Model):
             self.application_start_time,
             self.application_end_time,
         )
+
+
+class ApplicationQuestion(models.Model):
+    """
+    Represents a question of a custom application
+    """
+
+    TEXT = 1
+    MULTIPLE_CHOICE = 2
+    QUESTION_TYPES = (
+        (TEXT, "Text"),
+        (MULTIPLE_CHOICE, "Multiple Choice"),
+    )
+
+    question_type = models.IntegerField(choices=QUESTION_TYPES, default=TEXT)
+    prompt = models.TextField(blank=True)
+    precedence = models.IntegerField(default=0)
+    application = models.ForeignKey(
+        ClubApplication, related_name="questions", on_delete=models.CASCADE
+    )
+
+
+class QuestionResponse(models.Model):
+    """
+    Represents a response to a question on a custom application
+    """
+
+    question = models.ForeignKey(ApplicationQuestion, on_delete=models.CASCADE)
+    response = models.TextField(blank=True)
 
 
 @receiver(models.signals.pre_delete, sender=Asset)

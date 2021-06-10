@@ -51,6 +51,7 @@ from clubs.filters import RandomOrderingFilter, RandomPageNumberPagination
 from clubs.mixins import XLSXFormatterMixin
 from clubs.models import (
     Advisor,
+    ApplicationQuestion,
     Asset,
     Badge,
     Club,
@@ -98,6 +99,7 @@ from clubs.permissions import (
 )
 from clubs.serializers import (
     AdvisorSerializer,
+    ApplicationQuestionSerializer,
     AssetSerializer,
     AuthenticatedClubSerializer,
     AuthenticatedMembershipSerializer,
@@ -4104,13 +4106,19 @@ class ClubApplicationViewSet(viewsets.ModelViewSet):
     create: Create an application for the club.
 
     list: Retrieve a list of applications of the club.
-
-    get: Retrieve the details for a given application.
     """
 
     permission_classes = [ClubItemPermission | IsSuperuser]
     serializer_class = ClubApplicationSerializer
     http_method_names = ["get", "post", "put", "patch", "delete"]
+
+    @action(detail=False, methods=["get"])
+    def active(self, *args, **kwargs):
+        active_application = self.get_queryset().filter(is_active=True).first()
+        if active_application:
+            return Response([ClubApplicationSerializer(active_application).data])
+        else:
+            return Response([])
 
     def get_serializer_class(self):
         if self.action in {"create", "update", "partial_update"}:
@@ -4118,11 +4126,23 @@ class ClubApplicationViewSet(viewsets.ModelViewSet):
         return ClubApplicationSerializer
 
     def get_queryset(self):
-        now = timezone.now()
+        return ClubApplication.objects.filter(club__code=self.kwargs["club_code"])
 
-        return ClubApplication.objects.filter(
-            club__code=self.kwargs["club_code"], result_release_time__gte=now
-        ).order_by("application_end_time")
+
+class ApplicationQuestionViewSet(viewsets.ModelViewSet):
+    """
+    create: Create a questions for a club application.
+
+    list: List questions in a given club application.
+    """
+
+    permission_classes = [ClubItemPermission | IsSuperuser]
+    serializer_class = ApplicationQuestionSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete"]
+
+    def get_queryset(self):
+        # This is incorrect but for some reason it works
+        return ApplicationQuestion.objects.all()
 
 
 class BadgeClubViewSet(viewsets.ModelViewSet):

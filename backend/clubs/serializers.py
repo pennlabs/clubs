@@ -17,6 +17,7 @@ from simple_history.utils import update_change_reason
 from clubs.mixins import ManyToManySaveMixin
 from clubs.models import (
     Advisor,
+    ApplicationQuestion,
     Asset,
     Badge,
     Club,
@@ -2220,6 +2221,24 @@ class NoteTagSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoteTag
         fields = ("id", "name")
+
+
+class ApplicationQuestionSerializer(ClubRouteMixin, serializers.ModelSerializer):
+    class Meta:
+        model = ApplicationQuestion
+        fields = (
+            "question_type",
+            "prompt",
+        )
+
+    def create(self, validated_data):
+        validated_data.pop("club")
+        application_pk = self.context["view"].kwargs.get("application_pk")
+        validated_data["application"] = ClubApplication.objects.filter(
+            pk=application_pk
+        ).first()
+        obj = super().create(validated_data)
+        return obj
 
 
 class ClubApplicationSerializer(ClubRouteMixin, serializers.ModelSerializer):
