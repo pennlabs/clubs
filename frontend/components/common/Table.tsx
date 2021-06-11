@@ -14,6 +14,7 @@ import {
   BORDER,
   CLUBS_GREY,
   FOCUS_GRAY,
+  LIGHT_GRAY,
   WHITE,
 } from '../../constants/colors'
 import { BORDER_RADIUS, MD, mediaMaxWidth } from '../../constants/measurements'
@@ -62,7 +63,6 @@ type tableProps = {
 
 const Styles = styled.div`
   padding: 1rem;
-  width: 100%;
 `
 
 const SearchWrapper = styled.div`
@@ -76,7 +76,7 @@ const SearchWrapper = styled.div`
   }
 `
 const Toolbar = styled.div`
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 `
 const Input = styled.input`
   border: 1px solid ${ALLBIRDS_GRAY};
@@ -96,6 +96,10 @@ const Input = styled.input`
   }
 `
 
+const GreyText = styled.span`
+  color: ${LIGHT_GRAY};
+`
+
 const Table = ({
   columns,
   data,
@@ -105,16 +109,20 @@ const Table = ({
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [tableData, setTableData] = useState<Row[]>([])
   const [selectedFilter, setSelectedFilter] = useState<any>({})
+  const [sortedColumn, setSortedColumn] = useState<any>(null)
   useEffect(() => {
     const searchedData = data.filter((item) => {
       if (!searchQuery || searchQuery.length < 3) {
         return true
       }
       return searchableColumns.some((searchId) => {
-        const strings = item[searchId].split(' ')
-        return strings.some((string) =>
-          string.toLowerCase().startsWith(searchQuery.toLowerCase()),
-        )
+        if (typeof item[searchId] === 'string') {
+          const strings = item[searchId].split(' ')
+          return strings.some((string) =>
+            string.toLowerCase().startsWith(searchQuery.toLowerCase()),
+          )
+        }
+        return false
       })
     })
     const filteredData = searchedData.filter((item) => {
@@ -189,6 +197,18 @@ const Table = ({
     setSearchQuery(e.target.value)
   }
 
+  const handleColumnsSort = (target) => {
+    if (sortedColumn && sortedColumn.name === target) {
+      if (sortedColumn.status === 'asc') {
+        setSortedColumn({ name: target, status: 'desc' })
+      } else {
+        setSortedColumn(null)
+      }
+    } else {
+      setSortedColumn({ name: target, status: 'asc' })
+    }
+  }
+
   const components = {
     IndicatorSeparator: () => null,
   }
@@ -199,12 +219,9 @@ const Table = ({
     setSelectedFilter(newFilters)
   }
 
-  if (data.length <= 0) {
-    return <></>
-  }
   return (
     <Styles>
-      <Toolbar>
+      <Toolbar className="is-clearfix">
         <div className="is-pulled-right">
           <SearchWrapper>
             <Input
@@ -217,106 +234,117 @@ const Table = ({
             />
           </SearchWrapper>
         </div>
-        <div className="is-pulled-left" style={{ width: '70%' }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-            }}
-          >
-            {filterOptions &&
-              filterOptions.map((filterOption) => (
-                <div style={{ marginRight: '10px' }}>
-                  <Select
-                    value={
-                      selectedFilter[filterOption.label]
-                        ? {
-                            label: selectedFilter[filterOption.label].label,
-                            value: selectedFilter[filterOption.label].key,
-                          }
-                        : null
-                    }
-                    styles={styles}
-                    components={components}
-                    onChange={(value) =>
-                      handleFilterChange({
-                        value: value || null,
-                        label: filterOption.label ? filterOption.label : null,
-                      })
-                    }
-                    isClearable={true}
-                    placeholder={`Filter by ${titleize(filterOption.label)}`}
-                    options={filterOption.options.map((option) => {
-                      return { value: option.key, label: option.label }
-                    })}
-                  />
-                </div>
-              ))}
-          </div>
+        <div className="is-pulled-left is-clearfix" style={{ width: '70%' }}>
+          {filterOptions &&
+            filterOptions.map((filterOption) => (
+              <span
+                style={{ marginRight: '10px', width: '40%', float: 'left' }}
+              >
+                <Select
+                  value={
+                    selectedFilter[filterOption.label]
+                      ? {
+                          label: selectedFilter[filterOption.label].label,
+                          value: selectedFilter[filterOption.label].key,
+                        }
+                      : null
+                  }
+                  styles={styles}
+                  components={components}
+                  onChange={(value) =>
+                    handleFilterChange({
+                      value: value || null,
+                      label: filterOption.label ? filterOption.label : null,
+                    })
+                  }
+                  isClearable={true}
+                  placeholder={`Filter by ${titleize(filterOption.label)}`}
+                  options={filterOption.options.map((option) => {
+                    return { value: option.key, label: option.label }
+                  })}
+                />
+              </span>
+            ))}
         </div>
       </Toolbar>
 
-      {tableData.length > 0 ? (
+      {headerGroups.length > 0 ? (
         <table className="table is-fullwidth" {...getTableProps()}>
           <thead>
             {headerGroups.map((headerGroup) => (
               <tr {...headerGroup.getHeaderGroupProps()}>
                 {headerGroup.headers.map((column) => (
                   <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                    {titleize(column.render('Header'))}
-                    <span style={{ marginLeft: '1rem' }}>
-                      {column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <Icon name="chevron-down" />
+                    <div onClick={() => handleColumnsSort(column.Header)}>
+                      {titleize(column.render('Header'))}
+                      <span style={{ marginLeft: '1rem' }}>
+                        {column.isSorted ? (
+                          column.isSortedDesc ? (
+                            <Icon name="triangle-down" />
+                          ) : (
+                            <Icon name="triangle-up" />
+                          )
+                        ) : sortedColumn === null ? (
+                          <Icon name="group-arrows" />
                         ) : (
-                          <Icon name="chevron-up" />
-                        )
-                      ) : (
-                        ''
-                      )}
-                    </span>
+                          ''
+                        )}
+                      </span>
+                    </div>
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
-          <tbody {...getTableBodyProps()}>
-            {page.map((row, i) => {
-              prepareRow(row)
-              return (
-                <tr key={row.id} {...row.getRowProps()}>
-                  {columns.map((column, i) => {
-                    return (
-                      <td key={i}>
-                        {column.render
-                          ? column.render(row.original.id, row.id)
-                          : row.original[column.name]}
-                      </td>
-                    )
-                  })}
-                </tr>
-              )
-            })}
-          </tbody>
+          {tableData.length > 0 ? (
+            <tbody {...getTableBodyProps()}>
+              {page.map((row) => {
+                prepareRow(row)
+                return (
+                  <tr key={row.id} {...row.getRowProps()}>
+                    {columns.map((column, i) => {
+                      return (
+                        <td key={i}>
+                          {column.render
+                            ? column.render(row.original.id) || (
+                                <GreyText>None</GreyText>
+                              )
+                            : row.original[column.name] || (
+                                <GreyText>None</GreyText>
+                              )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          ) : data.length === 0 ? (
+            <h1>No items to show.</h1>
+          ) : (
+            <h1>No matches were found. Please change your filters.</h1>
+          )}
         </table>
       ) : (
-        <h1>No matches were found. Please change your filters.</h1>
+        <h1>Nothing to Show.</h1>
       )}
       {pageOptions.length > 1 && (
-        <div className="is-clearfix" style={{ display: 'flex' }}>
+        <div className="is-clearfix">
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => gotoPage(0)}
             disabled={!canPreviousPage}
           >
-            <Icon name="chevrons-left" />
+            {'<<'}
           </button>
           <button
             style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => previousPage()}
             disabled={!canPreviousPage}
           >
-            <Icon name="chevron-left" />
+            {'<'}
           </button>
           <select
             value={pageIndex}
@@ -332,21 +360,25 @@ const Table = ({
           </select>
           <button
             style={{ marginRight: '0.5rem' }}
-            onClick={() => gotoPage(pageCount - 1)}
-            disabled={!canNextPage}
-          >
-            <Icon name="chevron-right" />
-          </button>
-          <button
-            style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
             onClick={() => nextPage()}
             disabled={!canNextPage}
           >
-            <Icon name="chevrons-right" />
+            {'>'}
           </button>
-          <span className="is-pulled-right">
-            {data.length} total entries, {pageSize} entries per page
-          </span>
+          <button
+            style={{ marginRight: '0.5rem' }}
+            className="is-light is-small"
+            onClick={() => gotoPage(pageCount - 1)}
+            disabled={!canNextPage}
+          >
+            {'>>'}
+          </button>
+          <div className="is-pulled-right">
+            <span>
+              {data.length} total entries, {pageSize} entries per page
+            </span>
+          </div>
         </div>
       )}
     </Styles>

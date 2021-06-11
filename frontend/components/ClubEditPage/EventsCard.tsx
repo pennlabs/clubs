@@ -292,7 +292,22 @@ const eventTableFields = [
   {
     name: 'is_ics_event',
     label: 'ICS',
-    converter: (a: boolean): ReactElement => <Icon name={a ? 'check' : 'x'} />,
+    converter: (a: boolean): ReactElement => (
+      <Icon
+        className={`${a ? 'has-text-success' : 'has-text-danger'}`}
+        name={a ? 'check' : 'x'}
+      />
+    ),
+  },
+]
+
+const eventTableFilter = [
+  {
+    label: 'Types',
+    options: EVENT_TYPES.map((obj) => {
+      return { key: obj.value, label: obj.label }
+    }),
+    filterFunction: (selection, object) => object.type === selection,
   },
 ]
 
@@ -404,6 +419,7 @@ export default function EventsCard({ club }: EventsCardProps): ReactElement {
         fields={eventFields}
         fileFields={['image']}
         tableFields={eventTableFields}
+        filterOptions={eventTableFilter}
         noun="Event"
         currentTitle={(obj) => (obj != null ? obj.name : 'Deleted Event')}
         onChange={(obj) => {
