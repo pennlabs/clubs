@@ -13,4 +13,4 @@ apt-get update && apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify
 
 
 # Run tests
-yarn run cypress run || (mv cypress/screenshots/* cypress/videos/* ./test-results/; exit 1)
+yarn run cypress run --record --parallel || (mv cypress/screenshots/* cypress/videos/* ./test-results/; exit 1)
