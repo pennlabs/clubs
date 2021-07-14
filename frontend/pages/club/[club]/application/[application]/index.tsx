@@ -1,11 +1,13 @@
 import ClubMetadata from 'components/ClubMetadata'
-import { Container, Subtitle, Title } from 'components/common'
-import { Formik } from 'formik'
+import { Container, Icon, Title } from 'components/common'
+import { Field, Form, Formik } from 'formik'
 import { NextPageContext } from 'next'
 import React, { ReactElement } from 'react'
 import renderPage from 'renderPage'
 import { ApplicationQuestionType, Club } from 'types'
 import { doApiRequest } from 'utils'
+
+import { RichTextField } from '~/components/FormComponents'
 
 type Application = {
   name: string
@@ -16,6 +18,7 @@ type Application = {
 }
 
 type ApplicationQuestion = {
+  id: number
   question_type: ApplicationQuestionType
   prompt: string
 }
@@ -24,29 +27,42 @@ type ApplicationPageProps = {
   club: Club
   application: Application
   questions: ApplicationQuestion[]
+  initialValues: any
 }
 
 const ApplicationPage = ({
   club,
   application,
   questions,
+  initialValues,
 }: ApplicationPageProps): ReactElement => {
   function formatQuestionType(
     props: any,
-    questionType: ApplicationQuestionType,
+    question: ApplicationQuestion,
   ): JSX.Element {
-    switch (questionType) {
+    switch (question.question_type) {
       case ApplicationQuestionType.Text:
-        return <input type="text"></input>
+        return (
+          <Field
+            name={question.id}
+            label={question.prompt}
+            as={RichTextField}
+          />
+        )
       case ApplicationQuestionType.MultipleChoice:
-        return <input type="text"></input>
+        return (
+          <Field
+            name={question.id}
+            label={question.prompt}
+            as={RichTextField}
+          />
+        )
       default:
         return (
-          <input
-            type="text"
-            onChange={props.handleChange}
-            onBlur={props.handleBlur}
-            name="name"
+          <Field
+            name={question.id}
+            label={question.prompt}
+            as={RichTextField}
           />
         )
     }
@@ -61,28 +77,40 @@ const ApplicationPage = ({
         </div>
         <hr />
         <Formik
-          initialValues={{ name: 'jared' }}
+          initialValues={initialValues}
           onSubmit={(values, actions) => {
-            setTimeout(() => {
-              alert(JSON.stringify(values, null, 2))
-              actions.setSubmitting(false)
-            }, 1000)
+            for (const [questionId, text] of Object.entries(values)) {
+              doApiRequest('/users/questions/?format=json', {
+                method: 'POST',
+                body: {
+                  questionId,
+                  text,
+                },
+              })
+            }
           }}
         >
           {(props) => (
-            <form onSubmit={props.handleSubmit}>
+            <Form onSubmit={props.handleSubmit}>
               {questions.map((question: ApplicationQuestion) => {
-                const input = formatQuestionType(props, question.question_type)
+                const input = formatQuestionType(props, question)
                 return (
                   <div>
-                    <br></br>
-                    <Subtitle>{question.prompt}</Subtitle>
                     {input}
+                    <br></br>
                   </div>
                 )
               })}
-              <button type="submit">Submit</button>
-            </form>
+              <button type="submit" className="button is-primary">
+                <Icon name="edit" alt="save" /> Submit
+              </button>
+              <br></br>
+              <br></br>
+              <small>
+                Feel free to submit multiple times, only your most recent
+                submissions will be shared with the club application reviewers.
+              </small>
+            </Form>
           )}
         </Formik>
       </Container>
@@ -94,7 +122,6 @@ ApplicationPage.getInitialProps = async (
   ctx: NextPageContext,
 ): Promise<ApplicationPageProps> => {
   const { query, req } = ctx
-
   const data = {
     headers: req ? { cookie: req.headers.cookie } : undefined,
   }
@@ -105,7 +132,22 @@ ApplicationPage.getInitialProps = async (
       `/clubs/${query.club}/applications/${query.application}/questions/?format=json`,
     ].map(async (url) => (await doApiRequest(url, data)).json()),
   )
-  return { club, application, questions }
+
+  const initialValues = await questions
+    .map((question) => {
+      return [
+        question.id,
+        `/users/questions?format=json&prompt=${question.prompt}`,
+      ]
+    })
+    .reduce(async (acc, params) => {
+      const [id, url] = params
+      const payload = await (await doApiRequest(url, data)).json()
+      acc[id] = payload.text
+      return acc
+    }, {})
+
+  return { club, application, questions, initialValues }
 }
 
 export default renderPage(ApplicationPage)

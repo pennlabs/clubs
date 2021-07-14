@@ -52,6 +52,7 @@ from clubs.mixins import XLSXFormatterMixin
 from clubs.models import (
     Advisor,
     ApplicationQuestion,
+    ApplicationQuestionResponse,
     Asset,
     Badge,
     Club,
@@ -99,6 +100,7 @@ from clubs.permissions import (
 )
 from clubs.serializers import (
     AdvisorSerializer,
+    ApplicationQuestionResponseSerializer,
     ApplicationQuestionSerializer,
     AssetSerializer,
     AuthenticatedClubSerializer,
@@ -4085,7 +4087,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = get_user_model().objects.all().select_related("profile")
     permission_classes = [ProfilePermission | IsSuperuser]
     filter_backends = [filters.SearchFilter]
-    http_method_names = ["get"]
+    http_method_names = ["get", "post"]
 
     search_fields = [
         "email",
@@ -4094,6 +4096,33 @@ class UserViewSet(viewsets.ModelViewSet):
         "username",
     ]
     lookup_field = "username"
+
+    @action(detail=False, methods=["get", "post"])
+    def questions(self, *args, **kwargs):
+        if self.request.method == "GET":
+            prompt = self.request.GET.get("prompt")
+            response = (
+                ApplicationQuestionResponse.objects.filter(user=self.request.user)
+                .filter(question__prompt=prompt)
+                .order_by("-updated_at")
+                .first()
+            )
+            if prompt == "" or response is None:
+                return Response([])
+            else:
+                return Response(ApplicationQuestionResponseSerializer(response).data)
+        elif self.request.method == "POST":
+            question_pk = self.request.data.get("questionId")
+            text = self.request.data.get("text")
+            if question_pk is None or text is None or text == "":
+                return Response([])
+            else:
+                response = ApplicationQuestionResponse.objects.update_or_create(
+                    text=text,
+                    question=ApplicationQuestion.objects.filter(pk=question_pk).first(),
+                    user=self.request.user
+                )
+                return Response(ApplicationQuestionResponseSerializer(response).data)
 
     def get_serializer_class(self):
         if self.action in {"list"}:

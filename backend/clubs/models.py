@@ -1526,6 +1526,25 @@ class ApplicationQuestion(models.Model):
     )
 
 
+class ApplicationQuestionResponse(models.Model):
+    """
+    Represents a response to a question in a custom application. The fields here are
+    a union of all possible fields from all types of questions (most principally free
+    response, but also multiple choice, essay response, etc.).
+    """
+
+    text = models.TextField(blank=True)
+    question = models.ForeignKey(
+        ApplicationQuestion, related_name="responses", on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, null=False
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class QuestionResponse(models.Model):
     """
     Represents a response to a question on a custom application

@@ -32,6 +32,7 @@ const QUESTION_TYPES = [
 
 const ModalContainer = styled.div`
   text-align: left;
+  padding: 20px;
 `
 
 const ApplicationModal = (props: {
@@ -164,12 +165,19 @@ export default function ApplicationsCard({ club }: Props): ReactElement {
             render: (id) => {
               setApplicationName(id)
               return (
-                <button
-                  className="button is-primary is-small"
-                  onClick={showModal}
-                >
-                  Questions
-                </button>
+                <>
+                  <button
+                    className="button is-primary is-small"
+                    onClick={showModal}
+                  >
+                    Questions
+                  </button>
+                  <a href={`/club/${club.code}/application/${id}`}>
+                    <button className="button is-primary is-small ml-3">
+                      Preview
+                    </button>
+                  </a>
+                </>
               )
             },
           },

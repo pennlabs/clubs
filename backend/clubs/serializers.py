@@ -18,6 +18,7 @@ from clubs.mixins import ManyToManySaveMixin
 from clubs.models import (
     Advisor,
     ApplicationQuestion,
+    ApplicationQuestionResponse,
     Asset,
     Badge,
     Club,
@@ -2227,6 +2228,7 @@ class ApplicationQuestionSerializer(ClubRouteMixin, serializers.ModelSerializer)
     class Meta:
         model = ApplicationQuestion
         fields = (
+            "id",
             "question_type",
             "prompt",
         )
@@ -2239,6 +2241,14 @@ class ApplicationQuestionSerializer(ClubRouteMixin, serializers.ModelSerializer)
         ).first()
         obj = super().create(validated_data)
         return obj
+
+
+class ApplicationQuestionResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApplicationQuestionResponse
+        fields = (
+            "text",
+        )
 
 
 class ClubApplicationSerializer(ClubRouteMixin, serializers.ModelSerializer):
