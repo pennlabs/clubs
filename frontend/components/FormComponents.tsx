@@ -446,7 +446,13 @@ export const DynamicQuestionField = useFieldWrapper(
  */
 export const TextField = useFieldWrapper(
   (props: BasicFormField & AnyHack): ReactElement => {
-    const { type = 'text', isError, value, ...other } = props
+    const {
+      type = 'text',
+      isError,
+      value,
+      customHandleChange,
+      ...other
+    } = props
 
     const { setFieldValue } = useFormikContext()
 
@@ -627,6 +633,7 @@ type SelectFieldProps<T> = {
     : { value: string; label: string }
   formatOptionLabel: (inpt: any) => string | ReactElement
   isMulti?: boolean
+  customHandleChange?: (updated: any) => void
 }
 
 /**
@@ -647,6 +654,7 @@ export const SelectField = useFieldWrapper(
     valueDeserialize,
     isMulti,
     formatOptionLabel,
+    customHandleChange,
   }: BasicFormField &
     SelectFieldProps<
       { [key: string]: string | number } | string
@@ -711,7 +719,12 @@ export const SelectField = useFieldWrapper(
           }[]
         }
         formatOptionLabel={formatOptionLabel}
-        onChange={(opt): void => setFieldValue(name, actualSerialize(opt))}
+        onChange={(opt): void => {
+          setFieldValue(name, actualSerialize(opt))
+          if (customHandleChange !== undefined) {
+            customHandleChange(opt)
+          }
+        }}
         onBlur={onBlur}
         styles={{ container: (style) => ({ ...style, width: '100%' }) }}
       />

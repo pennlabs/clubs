@@ -51,6 +51,8 @@ from clubs.filters import RandomOrderingFilter, RandomPageNumberPagination
 from clubs.mixins import XLSXFormatterMixin
 from clubs.models import (
     Advisor,
+    ApplicationQuestion,
+    ApplicationQuestionResponse,
     Asset,
     Badge,
     Club,
@@ -98,6 +100,8 @@ from clubs.permissions import (
 )
 from clubs.serializers import (
     AdvisorSerializer,
+    ApplicationQuestionResponseSerializer,
+    ApplicationQuestionSerializer,
     AssetSerializer,
     AuthenticatedClubSerializer,
     AuthenticatedMembershipSerializer,
@@ -4083,7 +4087,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = get_user_model().objects.all().select_related("profile")
     permission_classes = [ProfilePermission | IsSuperuser]
     filter_backends = [filters.SearchFilter]
-    http_method_names = ["get"]
+    http_method_names = ["get", "post"]
 
     search_fields = [
         "email",
@@ -4092,6 +4096,33 @@ class UserViewSet(viewsets.ModelViewSet):
         "username",
     ]
     lookup_field = "username"
+
+    @action(detail=False, methods=["get", "post"])
+    def questions(self, *args, **kwargs):
+        if self.request.method == "GET":
+            prompt = self.request.GET.get("prompt")
+            response = (
+                ApplicationQuestionResponse.objects.filter(user=self.request.user)
+                .filter(question__prompt=prompt)
+                .order_by("-updated_at")
+                .first()
+            )
+            if prompt == "" or response is None:
+                return Response([])
+            else:
+                return Response(ApplicationQuestionResponseSerializer(response).data)
+        elif self.request.method == "POST":
+            question_pk = self.request.data.get("questionId")
+            text = self.request.data.get("text")
+            if question_pk is None or text is None or text == "":
+                return Response([])
+            else:
+                response = ApplicationQuestionResponse.objects.update_or_create(
+                    text=text,
+                    question=ApplicationQuestion.objects.filter(pk=question_pk).first(),
+                    user=self.request.user
+                )
+                return Response(ApplicationQuestionResponseSerializer(response).data)
 
     def get_serializer_class(self):
         if self.action in {"list"}:
@@ -4104,13 +4135,19 @@ class ClubApplicationViewSet(viewsets.ModelViewSet):
     create: Create an application for the club.
 
     list: Retrieve a list of applications of the club.
-
-    get: Retrieve the details for a given application.
     """
 
     permission_classes = [ClubItemPermission | IsSuperuser]
     serializer_class = ClubApplicationSerializer
     http_method_names = ["get", "post", "put", "patch", "delete"]
+
+    @action(detail=False, methods=["get"])
+    def active(self, *args, **kwargs):
+        active_application = self.get_queryset().filter(is_active=True).first()
+        if active_application:
+            return Response([ClubApplicationSerializer(active_application).data])
+        else:
+            return Response([])
 
     def get_serializer_class(self):
         if self.action in {"create", "update", "partial_update"}:
@@ -4118,11 +4155,23 @@ class ClubApplicationViewSet(viewsets.ModelViewSet):
         return ClubApplicationSerializer
 
     def get_queryset(self):
-        now = timezone.now()
+        return ClubApplication.objects.filter(club__code=self.kwargs["club_code"])
 
-        return ClubApplication.objects.filter(
-            club__code=self.kwargs["club_code"], result_release_time__gte=now
-        ).order_by("application_end_time")
+
+class ApplicationQuestionViewSet(viewsets.ModelViewSet):
+    """
+    create: Create a questions for a club application.
+
+    list: List questions in a given club application.
+    """
+
+    permission_classes = [ClubItemPermission | IsSuperuser]
+    serializer_class = ApplicationQuestionSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete"]
+
+    def get_queryset(self):
+        # This is incorrect but for some reason it works
+        return ApplicationQuestion.objects.all()
 
 
 class BadgeClubViewSet(viewsets.ModelViewSet):
