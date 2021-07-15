@@ -21,12 +21,16 @@ type Props = {
 }
 const QUESTION_TYPES = [
   {
-    value: ApplicationQuestionType.Text,
-    label: 'Text',
+    value: ApplicationQuestionType.FreeResponse,
+    label: 'Free Response',
   },
   {
     value: ApplicationQuestionType.MultipleChoice,
     label: 'Multiple Choice',
+  },
+  {
+    value: ApplicationQuestionType.ShortAnswer,
+    label: 'Short Answer',
   },
 ]
 
@@ -42,6 +46,11 @@ const ApplicationModal = (props: {
   onLinkClicked?: () => void
 }): ReactElement => {
   const { clubCode, applicationName, showDetailsButton, onLinkClicked } = props
+  // TODO: I'm positive that this is something that Formik should do for me
+  const [
+    questionType,
+    setQuestionType,
+  ] = useState<ApplicationQuestionType | null>()
 
   return (
     <ModalContainer>
@@ -56,15 +65,23 @@ const ApplicationModal = (props: {
               as={SelectField}
               choices={QUESTION_TYPES}
               required={true}
+              customHandleChange={(selection: {
+                value: ApplicationQuestionType
+                label: string
+              }) => {
+                setQuestionType(selection.value)
+              }}
             />
+            {questionType !== null &&
+              questionType === ApplicationQuestionType.FreeResponse && (
+                <Field name="word_limit" as={TextField} type={'number'} />
+              )}
           </>
         }
         tableFields={[
           { name: 'prompt', label: 'Prompt' },
-          {
-            name: 'type',
-            label: 'Type',
-          },
+          { name: 'type', label: 'Type' },
+          { name: 'word_limit', label: 'Word limit' },
         ]}
         noun="Application"
       />

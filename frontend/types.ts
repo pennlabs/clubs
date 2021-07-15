@@ -289,6 +289,7 @@ export type DynamicQuestion = {
 }
 
 export enum ApplicationQuestionType {
-  Text = 0,
-  MultipleChoice = 10,
+  FreeResponse = 1,
+  MultipleChoice = 2,
+  ShortAnswer = 3,
 }

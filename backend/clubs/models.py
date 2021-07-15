@@ -1511,16 +1511,19 @@ class ApplicationQuestion(models.Model):
     Represents a question of a custom application
     """
 
-    TEXT = 1
+    FREE_RESPONSE = 1
     MULTIPLE_CHOICE = 2
+    SHORT_ANSWER = 3
     QUESTION_TYPES = (
-        (TEXT, "Text"),
+        (FREE_RESPONSE, "Free Response"),
         (MULTIPLE_CHOICE, "Multiple Choice"),
+        (SHORT_ANSWER, "Short Answer"),
     )
 
-    question_type = models.IntegerField(choices=QUESTION_TYPES, default=TEXT)
+    question_type = models.IntegerField(choices=QUESTION_TYPES, default=FREE_RESPONSE)
     prompt = models.TextField(blank=True)
     precedence = models.IntegerField(default=0)
+    word_limit = models.IntegerField(default=0)
     application = models.ForeignKey(
         ClubApplication, related_name="questions", on_delete=models.CASCADE
     )

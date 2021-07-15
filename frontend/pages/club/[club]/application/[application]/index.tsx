@@ -2,12 +2,13 @@ import ClubMetadata from 'components/ClubMetadata'
 import { Container, Icon, Title } from 'components/common'
 import { Field, Form, Formik } from 'formik'
 import { NextPageContext } from 'next'
-import React, { ReactElement } from 'react'
+import React, { ReactElement, useState } from 'react'
 import renderPage from 'renderPage'
+import styled from 'styled-components'
 import { ApplicationQuestionType, Club } from 'types'
 import { doApiRequest } from 'utils'
 
-import { RichTextField } from '~/components/FormComponents'
+import { TextField } from '~/components/FormComponents'
 
 type Application = {
   name: string
@@ -21,6 +22,7 @@ type ApplicationQuestion = {
   id: number
   question_type: ApplicationQuestionType
   prompt: string
+  word_limit: number
 }
 
 type ApplicationPageProps = {
@@ -30,40 +32,54 @@ type ApplicationPageProps = {
   initialValues: any
 }
 
+const ErrorSpan = styled.span`
+  position: relative;
+  top: 0.5em;
+  left: 1em;
+`
+
 const ApplicationPage = ({
   club,
   application,
   questions,
   initialValues,
 }: ApplicationPageProps): ReactElement => {
+  const [errors, setErrors] = useState<string | null>(null)
+
+  function computeWordCount(input: string): number {
+    return input.split(' ').filter((word) => word !== '').length
+  }
+
   function formatQuestionType(
     props: any,
     question: ApplicationQuestion,
   ): JSX.Element {
+    const [wordCount, setWordCount] = useState<number>(
+      computeWordCount(initialValues[question.id]),
+    )
     switch (question.question_type) {
-      case ApplicationQuestionType.Text:
+      case ApplicationQuestionType.FreeResponse:
         return (
-          <Field
-            name={question.id}
-            label={question.prompt}
-            as={RichTextField}
-          />
+          <>
+            <Field
+              name={question.id}
+              label={question.prompt}
+              onInput={(event) => {
+                setWordCount(computeWordCount(event.target.value))
+              }}
+              as={TextField}
+              type={'textarea'}
+              helpText={`Word count: ${wordCount}/${question.word_limit}`}
+            />
+          </>
         )
       case ApplicationQuestionType.MultipleChoice:
         return (
-          <Field
-            name={question.id}
-            label={question.prompt}
-            as={RichTextField}
-          />
+          <Field name={question.id} label={question.prompt} as={TextField} />
         )
       default:
         return (
-          <Field
-            name={question.id}
-            label={question.prompt}
-            as={RichTextField}
-          />
+          <Field name={question.id} label={question.prompt} as={TextField} />
         )
     }
   }
@@ -78,15 +94,30 @@ const ApplicationPage = ({
         <hr />
         <Formik
           initialValues={initialValues}
-          onSubmit={(values, actions) => {
+          onSubmit={(values: { [id: number]: string }, actions) => {
             for (const [questionId, text] of Object.entries(values)) {
-              doApiRequest('/users/questions/?format=json', {
-                method: 'POST',
-                body: {
-                  questionId,
-                  text,
-                },
-              })
+              const question = questions.find(
+                (question: ApplicationQuestion) =>
+                  question.id === parseInt(questionId),
+              )
+              if (
+                question !== undefined &&
+                computeWordCount(text) > question.word_limit
+              ) {
+                setErrors('One of your responses exceeds the word limit!')
+              }
+            }
+
+            if (errors !== null) {
+              for (const [questionId, text] of Object.entries(values)) {
+                doApiRequest('/users/questions/?format=json', {
+                  method: 'POST',
+                  body: {
+                    questionId,
+                    text,
+                  },
+                })
+              }
             }
           }}
         >
@@ -104,6 +135,9 @@ const ApplicationPage = ({
               <button type="submit" className="button is-primary">
                 <Icon name="edit" alt="save" /> Submit
               </button>
+              {errors !== null && (
+                <ErrorSpan className="has-text-danger">{errors}</ErrorSpan>
+              )}
               <br></br>
               <br></br>
               <small>
